@@ -1,62 +1,72 @@
-# SafeHavun - Claude Instructions
+# SafeHavun - Claude Code Context
 
-> **Type:** Laravel 12 API + React Dashboard + PWA
-> **URL:** https://safehavun.havun.nl
-> **Repo:** https://github.com/havun22-hvu/SafeHavun
-
-## Wat is SafeHavun?
-
-Crypto Smart Money Tracker - On-chain analyse om "smart money" (whales) te volgen:
-- Whale alerts (grote transacties)
-- Exchange in/outflow
-- Stablecoin ratio's
-- Sentiment indicators
-- Marktrichting voorspellingen
+> **Smart Money Crypto Tracker** - Volg de whales, niet de massa
 
 ## Quick Reference
 
 | Item | Waarde |
 |------|--------|
-| **Lokaal** | D:\GitHub\SafeHavun |
-| **Server** | /var/www/safehavun/production |
-| **Database** | MySQL: safehavun |
-| **URL** | https://safehavun.havun.nl |
+| Framework | Laravel 12, PHP 8.2+ |
+| Database | MySQL |
+| URL | https://safehavun.havun.nl |
+| PWA | https://safehavun.havun.nl/pwa |
+| Versie | 1.0.0 |
 
-**Server:** 188.245.159.115 (root, SSH key)
+## Documentatie
 
-## Rules
+**Zie `docs/INDEX.md` voor volledige documentatie.**
 
-### Forbidden without permission
-- .env files wijzigen
-- Database migrations op production
-- Composer/npm packages installeren
-
-### Communication
-- Antwoord max 20-30 regels
-- Bullet points, direct to the point
+```
+docs/
+├── INDEX.md              # Navigatie
+├── setup/
+│   ├── INSTALL.md       # Lokale installatie
+│   ├── DEPLOY.md        # Server deployment
+│   └── CONFIG.md        # Environment config
+├── api/
+│   ├── SERVICES.md      # Externe API's (gratis)
+│   └── ENDPOINTS.md     # Interne REST API
+└── architecture/
+    ├── OVERVIEW.md      # Systeemarchitectuur
+    ├── DATABASE.md      # Models & tabellen
+    └── COMMANDS.md      # Artisan commands
+```
 
 ## Commands
 
-- `/end` - Sessie afronden, committen en deployen
+```bash
+# Data ophalen
+php artisan crypto:fetch-prices      # Prijzen
+php artisan crypto:fetch-fear-greed  # Sentiment
+php artisan crypto:fetch-whales      # Whale tracking
+php artisan crypto:generate-signals  # Signalen
 
-## Data Bronnen
-
-| Bron | Data | API |
-|------|------|-----|
-| CoinGecko | Prijzen, market cap | Gratis |
-| Whale Alert | Grote transacties | Gratis tier |
-| Alternative.me | Fear & Greed Index | Gratis |
+# Setup
+php artisan crypto:seed-assets       # Assets seeden
+```
 
 ## Deploy
 
 ```bash
-# Lokaal
-git add . && git commit -m "message" && git push
-
-# Server
 ssh root@188.245.159.115
 cd /var/www/safehavun/production
-git pull && composer install --no-dev
-php artisan migrate --force
-php artisan config:clear && php artisan cache:clear
+git pull
+php artisan config:cache && php artisan view:cache
 ```
+
+## Credentials
+
+**Staan NIET in git!**
+
+Zie HavunCore: `.claude/context.md`
+
+## Rules
+
+- Antwoord max 20-30 regels
+- Geen .env wijzigen zonder overleg
+- Geen composer/npm install zonder overleg
+- Commit messages in het Engels
+
+---
+
+© Havun 2025
