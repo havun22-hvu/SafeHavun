@@ -71,6 +71,81 @@
         </div>
     </div>
 
+    <!-- Whale Activity -->
+    <div class="glass rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">Smart Money Bewegingen</h2>
+            @if(isset($whaleSummary['sentiment']))
+                <span class="px-3 py-1 rounded-full text-sm {{ $whaleSummary['sentiment'] === 'bullish' ? 'bg-bullish/20 text-bullish' : 'bg-bearish/20 text-bearish' }}">
+                    {{ $whaleSummary['sentiment'] === 'bullish' ? '↑ Whales accumuleren' : '↓ Whales distribueren' }}
+                </span>
+            @endif
+        </div>
+
+        <!-- Whale Flow Summary -->
+        <div class="grid grid-cols-2 gap-4 mb-4">
+            <div class="bg-bullish/10 border border-bullish/30 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Exchange Outflow (Bullish)</p>
+                <p class="text-2xl font-bold text-bullish">
+                    {{ $whaleSummary['outflows']->count() ?? 0 }} txs
+                </p>
+                <p class="text-sm text-gray-400">Whales halen crypto van exchanges</p>
+            </div>
+            <div class="bg-bearish/10 border border-bearish/30 rounded-lg p-4">
+                <p class="text-gray-400 text-sm">Exchange Inflow (Bearish)</p>
+                <p class="text-2xl font-bold text-bearish">
+                    {{ $whaleSummary['inflows']->count() ?? 0 }} txs
+                </p>
+                <p class="text-sm text-gray-400">Whales sturen crypto naar exchanges</p>
+            </div>
+        </div>
+
+        <!-- Recent Whale Alerts -->
+        @if($whaleAlerts->isNotEmpty())
+            <h3 class="text-gray-400 text-sm uppercase tracking-wide mb-3">Recente Whale Transacties</h3>
+            <div class="space-y-2">
+                @foreach($whaleAlerts as $alert)
+                    <div class="flex items-center space-x-4 p-3 bg-white/5 rounded-lg">
+                        <div class="text-2xl {{ $alert->direction === 'exchange_outflow' ? 'text-bullish' : ($alert->direction === 'exchange_inflow' ? 'text-bearish' : 'text-gray-400') }}">
+                            @if($alert->direction === 'exchange_outflow')
+                                ↑
+                            @elseif($alert->direction === 'exchange_inflow')
+                                ↓
+                            @else
+                                ↔
+                            @endif
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-medium">
+                                {{ number_format($alert->amount, 2) }} {{ $alert->asset->symbol }}
+                                @if($alert->direction === 'exchange_outflow')
+                                    van exchange gehaald
+                                @elseif($alert->direction === 'exchange_inflow')
+                                    naar exchange gestuurd
+                                @else
+                                    verplaatst
+                                @endif
+                            </p>
+                            <p class="text-sm text-gray-400">
+                                @if($alert->amount_usd)
+                                    ~${{ number_format($alert->amount_usd / 1000000, 1) }}M •
+                                @endif
+                                {{ $alert->transaction_at->diffForHumans() }}
+                            </p>
+                        </div>
+                        <div class="text-right">
+                            <span class="px-2 py-1 rounded text-xs {{ $alert->direction === 'exchange_outflow' ? 'bg-bullish/20 text-bullish' : ($alert->direction === 'exchange_inflow' ? 'bg-bearish/20 text-bearish' : 'bg-gray-500/20 text-gray-400') }}">
+                                {{ $alert->direction === 'exchange_outflow' ? 'BULLISH' : ($alert->direction === 'exchange_inflow' ? 'BEARISH' : 'NEUTRAL') }}
+                            </span>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <p class="text-gray-400 text-center py-4">Nog geen whale bewegingen gedetecteerd. Data wordt elk uur opgehaald.</p>
+        @endif
+    </div>
+
     <!-- Crypto Assets -->
     <div class="glass rounded-xl p-6">
         <h2 class="text-xl font-semibold mb-4">Cryptocurrencies</h2>

@@ -12,4 +12,5 @@ Artisan::command('inspire', function () {
 Schedule::command('crypto:fetch-prices')->everyFifteenMinutes();
 Schedule::command('crypto:fetch-fear-greed')->hourly();
 Schedule::command('crypto:fetch-gold')->everyThirtyMinutes();
+Schedule::command('crypto:fetch-whales')->hourly();
 Schedule::command('crypto:generate-signals')->everyFifteenMinutes();

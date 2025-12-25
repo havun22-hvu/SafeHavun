@@ -6,12 +6,14 @@ use App\Models\Asset;
 use App\Models\FearGreedIndex;
 use App\Models\MarketSignal;
 use App\Models\Price;
+use App\Models\WhaleAlert;
 use App\Services\MarketSignalService;
+use App\Services\WhaleTrackingService;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function index(MarketSignalService $signalService): View
+    public function index(MarketSignalService $signalService, WhaleTrackingService $whaleService): View
     {
         $assets = Asset::active()
             ->with('latestPrice')
@@ -32,12 +34,23 @@ class DashboardController extends Controller
             ->limit(10)
             ->get();
 
+        // Whale activity
+        $whaleAlerts = WhaleAlert::with('asset')
+            ->where('transaction_at', '>=', now()->subHours(24))
+            ->orderBy('transaction_at', 'desc')
+            ->limit(10)
+            ->get();
+
+        $whaleSummary = $whaleService->getWhaleActivitySummary(24);
+
         return view('dashboard.index', compact(
             'cryptoAssets',
             'otherAssets',
             'fearGreed',
             'marketOverview',
-            'recentSignals'
+            'recentSignals',
+            'whaleAlerts',
+            'whaleSummary'
         ));
     }
 
