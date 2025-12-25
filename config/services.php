@@ -35,4 +35,26 @@ return [
         ],
     ],
 
+    // Crypto API Services
+    'coingecko' => [
+        'url' => env('COINGECKO_API_URL', 'https://api.coingecko.com/api/v3'),
+    ],
+
+    'whale_alert' => [
+        'url' => env('WHALE_ALERT_API_URL', 'https://api.whale-alert.io/v1'),
+        'key' => env('WHALE_ALERT_API_KEY'),
+    ],
+
+    'fear_greed' => [
+        'url' => env('FEAR_GREED_API_URL', 'https://api.alternative.me/fng'),
+    ],
+
+    'gold' => [
+        'url' => env('GOLD_API_URL', 'https://api.frankfurter.app'),
+    ],
+
+    'metals' => [
+        'key' => env('METALS_API_KEY', 'demo'),
+    ],
+
 ];
