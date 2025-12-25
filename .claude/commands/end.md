@@ -2,12 +2,14 @@
 
 Voer de volgende stappen uit om de sessie netjes af te ronden:
 
-## 1. Git commit & push
+## 1. Git commit & push (LOKAAL)
 - `git add .`
 - Maak een duidelijke commit message met samenvatting van de wijzigingen
 - `git push origin master`
 
-## 2. Deploy naar server
+**BELANGRIJK:** Altijd via GitHub deployen! Nooit rsync/scp gebruiken.
+
+## 2. Deploy naar server (via git pull)
 ```bash
 ssh root@188.245.159.115 << 'EOF'
 cd /var/www/safehavun/production
