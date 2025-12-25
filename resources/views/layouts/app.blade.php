@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="SafeHavun - Smart Money Crypto Tracker. Volg de whales, niet de massa.">
     <title>@yield('title', 'SafeHavun') - Smart Money Tracker</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
