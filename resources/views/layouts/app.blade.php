@@ -68,8 +68,17 @@
                     </span>
                 </a>
                 <div class="flex items-center space-x-4">
-                    <a href="{{ route('dashboard') }}" class="hover:text-emerald-400 transition">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="hover:text-emerald-400 transition {{ request()->routeIs('dashboard') ? 'text-emerald-400' : '' }}">Dashboard</a>
+                    @auth
+                    <a href="{{ route('portfolio.index') }}" class="hover:text-emerald-400 transition {{ request()->routeIs('portfolio.*') ? 'text-emerald-400' : '' }}">Portfolio</a>
+                    @endauth
                     <a href="{{ route('pwa') }}" class="hover:text-emerald-400 transition">PWA</a>
+                    @auth
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:text-red-400 transition">Uitloggen</button>
+                    </form>
+                    @endauth
                 </div>
             </div>
         </div>

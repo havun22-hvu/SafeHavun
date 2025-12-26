@@ -4,13 +4,16 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laragear\WebAuthn\Contracts\WebAuthnAuthenticatable;
+use Laragear\WebAuthn\WebAuthnAuthentication;
 
-class User extends Authenticatable
+class User extends Authenticatable implements WebAuthnAuthenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, WebAuthnAuthentication;
 
     /**
      * The attributes that are mass assignable.
@@ -44,5 +47,25 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function authDevices(): HasMany
+    {
+        return $this->hasMany(AuthDevice::class);
+    }
+
+    public function exchangeCredentials(): HasMany
+    {
+        return $this->hasMany(ExchangeCredential::class);
+    }
+
+    public function exchangeTransactions(): HasMany
+    {
+        return $this->hasMany(ExchangeTransaction::class);
+    }
+
+    public function getBitvavoCredential(): ?ExchangeCredential
+    {
+        return $this->exchangeCredentials()->bitvavo()->active()->first();
     }
 }
