@@ -142,6 +142,27 @@
 let deviceFingerprint = null;
 let currentPin = '';
 
+// Get fresh CSRF token from meta tag
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+// Wrapper for fetch that handles 419 by refreshing the page
+async function csrfFetch(url, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['X-CSRF-TOKEN'] = getCsrfToken();
+
+    const response = await fetch(url, options);
+
+    if (response.status === 419) {
+        // Session expired, reload page to get fresh token
+        window.location.reload();
+        return null;
+    }
+
+    return response;
+}
+
 async function generateFingerprint() {
     const data = [
         navigator.userAgent,
@@ -214,14 +235,12 @@ function hidePinError() {
 
 async function submitPin() {
     try {
-        const res = await fetch('/auth/pin/login', {
+        const res = await csrfFetch('/auth/pin/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fingerprint: deviceFingerprint, pin: currentPin }),
         });
+        if (!res) return;
         const data = await res.json();
         if (data.success) {
             window.location.href = data.redirect || '/';
@@ -239,11 +258,11 @@ async function startBiometric() {
         return;
     }
     try {
-        const optRes = await fetch('/auth/passkey/login/options', {
+        const optRes = await csrfFetch('/auth/passkey/login/options', {
             method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         });
-        if (!optRes.ok) { showPinError('Geen passkey gevonden'); return; }
+        if (!optRes || !optRes.ok) { showPinError('Geen passkey gevonden'); return; }
         const options = await optRes.json();
         if (!options.challenge) { showPinError('Geen passkey gevonden'); return; }
 
@@ -259,9 +278,9 @@ async function startBiometric() {
             }));
         }
         const credential = await navigator.credentials.get({ publicKey: publicKeyOptions });
-        const loginRes = await fetch('/auth/passkey/login', {
+        const loginRes = await csrfFetch('/auth/passkey/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id: credential.id,
                 rawId: bufferToBase64url(credential.rawId),
@@ -274,7 +293,7 @@ async function startBiometric() {
                 },
             }),
         });
-        if (loginRes.ok) window.location.href = '/';
+        if (loginRes && loginRes.ok) window.location.href = '/';
         else showPinError('Biometrie mislukt');
     } catch (err) {
         if (err.name !== 'NotAllowedError') showPinError('Biometrie geannuleerd');
@@ -302,9 +321,8 @@ async function generateQr() {
     document.getElementById('qr-timer').classList.add('hidden');
 
     try {
-        const res = await fetch('/auth/qr/generate', {
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-        });
+        const res = await csrfFetch('/auth/qr/generate');
+        if (!res) return;
         const data = await res.json();
         if (data.success) {
             qrToken = data.token;
@@ -388,11 +406,12 @@ document.addEventListener('keydown', e => {
 (async function() {
     deviceFingerprint = await generateFingerprint();
     try {
-        const res = await fetch('/auth/pin/check-device', {
+        const res = await csrfFetch('/auth/pin/check-device', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fingerprint: deviceFingerprint }),
         });
+        if (!res) return;
         const data = await res.json();
         document.getElementById('loading-state').classList.add('hidden');
 
