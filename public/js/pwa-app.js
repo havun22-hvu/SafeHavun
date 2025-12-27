@@ -466,34 +466,53 @@ const PWA = {
      * Load portfolio data
      */
     async loadPortfolioData() {
+        const authRequired = document.getElementById('portfolio-auth-required');
+        const setupRequired = document.getElementById('portfolio-setup-required');
+        const content = document.getElementById('portfolio-content');
+
+        // Hide all first
+        authRequired.classList.add('hidden');
+        setupRequired.classList.add('hidden');
+        content.classList.add('hidden');
+
         if (!this.config.isAuthenticated) {
-            document.getElementById('portfolio-auth-required').classList.remove('hidden');
-            document.getElementById('portfolio-setup-required').classList.add('hidden');
-            document.getElementById('portfolio-content').classList.add('hidden');
+            authRequired.classList.remove('hidden');
             return;
         }
 
-        document.getElementById('portfolio-auth-required').classList.add('hidden');
-
         try {
             const res = await this.csrfFetch('/api/portfolio');
-            if (!res) return;
+
+            if (!res) {
+                // Network error - show setup form as fallback
+                setupRequired.classList.remove('hidden');
+                return;
+            }
+
+            if (res.status === 401) {
+                // Not authenticated - show login
+                this.config.isAuthenticated = false;
+                authRequired.classList.remove('hidden');
+                return;
+            }
 
             if (res.status === 404) {
-                // No Bitvavo connected
-                document.getElementById('portfolio-setup-required').classList.remove('hidden');
-                document.getElementById('portfolio-content').classList.add('hidden');
+                // No Bitvavo connected - show setup form
+                setupRequired.classList.remove('hidden');
                 return;
             }
 
             if (res.ok) {
                 const data = await res.json();
-                document.getElementById('portfolio-setup-required').classList.add('hidden');
-                document.getElementById('portfolio-content').classList.remove('hidden');
+                content.classList.remove('hidden');
                 this.updatePortfolio(data);
+            } else {
+                // Other error - show setup form
+                setupRequired.classList.remove('hidden');
             }
         } catch (error) {
             console.error('Portfolio load error:', error);
+            setupRequired.classList.remove('hidden');
         }
     },
 
