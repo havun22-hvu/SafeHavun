@@ -769,26 +769,32 @@ const PWA = {
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
 
-            // Check Bitvavo status
+            // Load user info
             try {
-                const res = await this.csrfFetch('/api/portfolio');
-                if (res && res.status === 200) {
-                    // Bitvavo is connected
-                    document.getElementById('bitvavo-status-text').textContent = 'Gekoppeld';
-                    document.getElementById('bitvavo-status-text').classList.remove('text-gray-400');
-                    document.getElementById('bitvavo-status-text').classList.add('text-emerald-400');
-                    document.getElementById('bitvavo-connect-action').classList.add('hidden');
-                    document.getElementById('bitvavo-disconnect-action').classList.remove('hidden');
-                } else {
-                    // Not connected
-                    document.getElementById('bitvavo-status-text').textContent = 'Niet gekoppeld';
-                    document.getElementById('bitvavo-status-text').classList.add('text-gray-400');
-                    document.getElementById('bitvavo-status-text').classList.remove('text-emerald-400');
-                    document.getElementById('bitvavo-connect-action').classList.remove('hidden');
-                    document.getElementById('bitvavo-disconnect-action').classList.add('hidden');
+                const res = await this.csrfFetch('/api/user');
+                if (res && res.ok) {
+                    const user = await res.json();
+                    document.getElementById('user-initial').textContent = user.initial || '?';
+                    document.getElementById('user-name').textContent = user.name || '-';
+                    document.getElementById('user-email').textContent = user.email || '-';
+
+                    // Update Bitvavo status
+                    if (user.has_bitvavo) {
+                        document.getElementById('bitvavo-status-text').textContent = 'Gekoppeld';
+                        document.getElementById('bitvavo-status-text').classList.remove('text-gray-400');
+                        document.getElementById('bitvavo-status-text').classList.add('text-emerald-400');
+                        document.getElementById('bitvavo-connect-action').classList.add('hidden');
+                        document.getElementById('bitvavo-disconnect-action').classList.remove('hidden');
+                    } else {
+                        document.getElementById('bitvavo-status-text').textContent = 'Niet gekoppeld';
+                        document.getElementById('bitvavo-status-text').classList.add('text-gray-400');
+                        document.getElementById('bitvavo-status-text').classList.remove('text-emerald-400');
+                        document.getElementById('bitvavo-connect-action').classList.remove('hidden');
+                        document.getElementById('bitvavo-disconnect-action').classList.add('hidden');
+                    }
                 }
             } catch (e) {
-                // Error checking
+                // Error loading user info
             }
         } else {
             document.getElementById('login-prompt').classList.remove('hidden');

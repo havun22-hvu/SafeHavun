@@ -78,6 +78,7 @@ Route::prefix('api')->group(function () {
 
     // Protected API routes (for PWA)
     Route::middleware(['auth'])->group(function () {
+        Route::get('/user', [ApiController::class, 'userInfo'])->name('api.user');
         Route::get('/portfolio', [ApiController::class, 'portfolio'])->name('api.portfolio');
         Route::post('/portfolio/sync', [ApiController::class, 'portfolioSync'])->name('api.portfolio.sync');
         Route::post('/portfolio/connect', [ApiController::class, 'portfolioConnect'])->name('api.portfolio.connect');

@@ -264,4 +264,22 @@ class ApiController extends Controller
             'message' => 'Bitvavo ontkoppeld'
         ]);
     }
+
+    public function userInfo(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $hasBitvavo = $user->exchangeCredentials()->where('exchange', 'bitvavo')->exists();
+
+        return response()->json([
+            'name' => $user->name,
+            'email' => $user->email,
+            'initial' => strtoupper(substr($user->name, 0, 1)),
+            'has_bitvavo' => $hasBitvavo,
+        ]);
+    }
 }
