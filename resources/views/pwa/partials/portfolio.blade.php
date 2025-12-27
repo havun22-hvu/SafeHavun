@@ -11,16 +11,53 @@
         </button>
     </div>
 
-    <!-- Setup Required Message (when no Bitvavo connected) -->
-    <div id="portfolio-setup-required" class="hidden glass rounded-2xl p-8 text-center">
-        <svg class="w-16 h-16 mx-auto text-blue-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-        </svg>
-        <h3 class="text-lg font-semibold mb-2">Koppel Bitvavo</h3>
-        <p class="text-gray-400 text-sm mb-4">Verbind je Bitvavo account om je portfolio te zien</p>
-        <a href="/portfolio/setup" class="inline-block px-6 py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition">
-            Bitvavo Koppelen
-        </a>
+    <!-- Setup Form (when no Bitvavo connected) -->
+    <div id="portfolio-setup-required" class="hidden space-y-4">
+        <div class="glass rounded-2xl p-6">
+            <div class="text-center mb-6">
+                <svg class="w-12 h-12 mx-auto text-blue-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold">Koppel Bitvavo</h3>
+                <p class="text-gray-400 text-sm mt-1">Voer je API keys in om je portfolio te synchroniseren</p>
+            </div>
+
+            <!-- Error message -->
+            <div id="bitvavo-setup-error" class="hidden mb-4 p-3 bg-red-500/20 border border-red-500/30 rounded-lg text-red-300 text-sm"></div>
+
+            <!-- API Key -->
+            <div class="mb-4">
+                <label class="block text-gray-400 text-sm mb-2">API Key</label>
+                <input type="text" id="bitvavo-api-key"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                    placeholder="Voer je Bitvavo API key in">
+            </div>
+
+            <!-- API Secret -->
+            <div class="mb-6">
+                <label class="block text-gray-400 text-sm mb-2">API Secret</label>
+                <input type="password" id="bitvavo-api-secret"
+                    class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition"
+                    placeholder="Voer je Bitvavo API secret in">
+            </div>
+
+            <!-- Submit -->
+            <button onclick="PWA.connectBitvavo()" id="bitvavo-connect-btn"
+                class="w-full py-3 bg-blue-500 hover:bg-blue-600 rounded-xl font-semibold transition flex items-center justify-center space-x-2">
+                <span>Koppelen</span>
+            </button>
+        </div>
+
+        <!-- Help -->
+        <div class="glass rounded-2xl p-4">
+            <p class="text-gray-400 text-sm font-medium mb-2">Hoe krijg ik API keys?</p>
+            <ol class="text-gray-500 text-sm space-y-1">
+                <li>1. Log in op <span class="text-blue-400">bitvavo.com</span></li>
+                <li>2. Ga naar Instellingen &gt; API</li>
+                <li>3. Maak een nieuwe API key aan</li>
+                <li>4. Zet alleen <span class="text-emerald-400">Lezen</span> rechten aan</li>
+            </ol>
+        </div>
     </div>
 
     <!-- Portfolio Content (when authenticated + connected) -->

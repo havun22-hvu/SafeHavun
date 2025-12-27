@@ -80,5 +80,7 @@ Route::prefix('api')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/portfolio', [ApiController::class, 'portfolio'])->name('api.portfolio');
         Route::post('/portfolio/sync', [ApiController::class, 'portfolioSync'])->name('api.portfolio.sync');
+        Route::post('/portfolio/connect', [ApiController::class, 'portfolioConnect'])->name('api.portfolio.connect');
+        Route::delete('/portfolio/disconnect', [ApiController::class, 'portfolioDisconnect'])->name('api.portfolio.disconnect');
     });
 });

@@ -549,6 +549,82 @@ const PWA = {
     },
 
     /**
+     * Connect Bitvavo
+     */
+    async connectBitvavo() {
+        const apiKey = document.getElementById('bitvavo-api-key').value.trim();
+        const apiSecret = document.getElementById('bitvavo-api-secret').value.trim();
+        const errorEl = document.getElementById('bitvavo-setup-error');
+        const btn = document.getElementById('bitvavo-connect-btn');
+
+        // Validate
+        if (!apiKey || !apiSecret) {
+            errorEl.textContent = 'Vul beide velden in';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+
+        // Show loading
+        btn.disabled = true;
+        btn.innerHTML = '<svg class="w-5 h-5 animate-spin" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Verbinden...</span>';
+        errorEl.classList.add('hidden');
+
+        try {
+            const res = await this.csrfFetch('/api/portfolio/connect', {
+                method: 'POST',
+                body: JSON.stringify({
+                    api_key: apiKey,
+                    api_secret: apiSecret
+                })
+            });
+
+            if (!res) {
+                throw new Error('Geen verbinding');
+            }
+
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                this.showToast('Bitvavo gekoppeld!', 'success');
+                // Clear form
+                document.getElementById('bitvavo-api-key').value = '';
+                document.getElementById('bitvavo-api-secret').value = '';
+                // Reload portfolio
+                this.loadPortfolioData();
+            } else {
+                errorEl.textContent = data.error || 'Koppeling mislukt';
+                errorEl.classList.remove('hidden');
+            }
+        } catch (error) {
+            errorEl.textContent = 'Verbinding mislukt: ' + error.message;
+            errorEl.classList.remove('hidden');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<span>Koppelen</span>';
+    },
+
+    /**
+     * Disconnect Bitvavo
+     */
+    async disconnectBitvavo() {
+        if (!confirm('Weet je zeker dat je Bitvavo wilt ontkoppelen?')) return;
+
+        try {
+            const res = await this.csrfFetch('/api/portfolio/disconnect', {
+                method: 'DELETE'
+            });
+
+            if (res && res.ok) {
+                this.showToast('Bitvavo ontkoppeld', 'info');
+                this.loadPortfolioData();
+            }
+        } catch (error) {
+            this.showToast('Ontkoppelen mislukt', 'error');
+        }
+    },
+
+    /**
      * Sync portfolio
      */
     async syncPortfolio() {
@@ -687,15 +763,39 @@ const PWA = {
     /**
      * Update settings tab
      */
-    updateSettingsTab() {
+    async updateSettingsTab() {
         if (this.config.isAuthenticated) {
             document.getElementById('login-prompt').classList.add('hidden');
             document.getElementById('user-info').classList.remove('hidden');
             document.getElementById('logout-btn').classList.remove('hidden');
+
+            // Check Bitvavo status
+            try {
+                const res = await this.csrfFetch('/api/portfolio');
+                if (res && res.status === 200) {
+                    // Bitvavo is connected
+                    document.getElementById('bitvavo-status-text').textContent = 'Gekoppeld';
+                    document.getElementById('bitvavo-status-text').classList.remove('text-gray-400');
+                    document.getElementById('bitvavo-status-text').classList.add('text-emerald-400');
+                    document.getElementById('bitvavo-connect-action').classList.add('hidden');
+                    document.getElementById('bitvavo-disconnect-action').classList.remove('hidden');
+                } else {
+                    // Not connected
+                    document.getElementById('bitvavo-status-text').textContent = 'Niet gekoppeld';
+                    document.getElementById('bitvavo-status-text').classList.add('text-gray-400');
+                    document.getElementById('bitvavo-status-text').classList.remove('text-emerald-400');
+                    document.getElementById('bitvavo-connect-action').classList.remove('hidden');
+                    document.getElementById('bitvavo-disconnect-action').classList.add('hidden');
+                }
+            } catch (e) {
+                // Error checking
+            }
         } else {
             document.getElementById('login-prompt').classList.remove('hidden');
             document.getElementById('user-info').classList.add('hidden');
             document.getElementById('logout-btn').classList.add('hidden');
+            document.getElementById('bitvavo-connect-action').classList.remove('hidden');
+            document.getElementById('bitvavo-disconnect-action').classList.add('hidden');
         }
     },
 

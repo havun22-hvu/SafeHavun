@@ -6,7 +6,9 @@ use App\Models\Asset;
 use App\Models\FearGreedIndex;
 use App\Models\MarketSignal;
 use App\Models\Price;
+use App\Models\ExchangeCredential;
 use App\Models\WhaleAlert;
+use App\Services\BitvavoService;
 use App\Services\MarketSignalService;
 use App\Services\PortfolioService;
 use Illuminate\Http\JsonResponse;
@@ -196,5 +198,70 @@ class ApiController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function portfolioConnect(Request $request): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $validated = $request->validate([
+            'api_key' => 'required|string|min:10',
+            'api_secret' => 'required|string|min:10',
+        ]);
+
+        // Test connection first
+        $credential = new ExchangeCredential([
+            'user_id' => $user->id,
+            'exchange' => 'bitvavo',
+            'api_key' => $validated['api_key'],
+            'api_secret' => $validated['api_secret'],
+        ]);
+
+        $bitvavo = new BitvavoService($credential);
+        $test = $bitvavo->testConnection();
+
+        if (!$test['success']) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Kon geen verbinding maken: ' . ($test['error'] ?? 'Controleer je API keys')
+            ], 400);
+        }
+
+        // Save or update credentials
+        ExchangeCredential::updateOrCreate(
+            ['user_id' => $user->id, 'exchange' => 'bitvavo'],
+            [
+                'api_key' => $validated['api_key'],
+                'api_secret' => $validated['api_secret'],
+                'is_active' => true,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bitvavo gekoppeld'
+        ]);
+    }
+
+    public function portfolioDisconnect(): JsonResponse
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        ExchangeCredential::where('user_id', $user->id)
+            ->where('exchange', 'bitvavo')
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Bitvavo ontkoppeld'
+        ]);
     }
 }

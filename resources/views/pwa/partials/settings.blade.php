@@ -60,7 +60,8 @@
                             <p id="bitvavo-status-text" class="text-sm text-gray-400">Niet gekoppeld</p>
                         </div>
                     </div>
-                    <a href="/portfolio/setup" id="bitvavo-action" class="text-sm text-blue-400">Koppelen</a>
+                    <button onclick="PWA.switchTab('portfolio')" id="bitvavo-connect-action" class="text-sm text-blue-400">Koppelen</button>
+                    <button onclick="PWA.disconnectBitvavo()" id="bitvavo-disconnect-action" class="hidden text-sm text-red-400">Ontkoppelen</button>
                 </div>
             </div>
 
