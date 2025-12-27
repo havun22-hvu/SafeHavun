@@ -128,6 +128,10 @@
             <button type="submit" class="w-full py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors">
                 Inloggen
             </button>
+
+            <p class="mt-4 text-center text-sm text-gray-400">
+                Nog geen account? <a href="{{ route('register') }}" class="text-emerald-400 hover:text-emerald-300 font-medium">Registreren</a>
+            </p>
         </form>
     </div>
 </div>
