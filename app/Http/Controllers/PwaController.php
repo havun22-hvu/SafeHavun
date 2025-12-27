@@ -11,16 +11,8 @@ class PwaController extends Controller
 {
     public function index(MarketSignalService $signalService): View
     {
-        $marketOverview = $signalService->getMarketOverview();
-        $fearGreed = FearGreedIndex::latest();
-
-        $topAssets = Asset::active()
-            ->crypto()
-            ->with('latestPrice')
-            ->whereIn('symbol', ['BTC', 'ETH', 'SOL', 'XRP', 'ADA'])
-            ->get();
-
-        return view('pwa.index', compact('marketOverview', 'fearGreed', 'topAssets'));
+        // Use new full PWA app view
+        return view('pwa.app');
     }
 
     public function manifest()

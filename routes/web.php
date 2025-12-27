@@ -68,9 +68,17 @@ Route::get('/manifest.json', [PwaController::class, 'manifest'])->name('pwa.mani
 
 // API Routes
 Route::prefix('api')->group(function () {
+    // Public API routes
     Route::get('/prices', [ApiController::class, 'prices'])->name('api.prices');
     Route::get('/prices/{asset}/history', [ApiController::class, 'priceHistory'])->name('api.price-history');
     Route::get('/signals', [ApiController::class, 'signals'])->name('api.signals');
     Route::get('/market-overview', [ApiController::class, 'marketOverview'])->name('api.market-overview');
     Route::get('/fear-greed/history', [ApiController::class, 'fearGreedHistory'])->name('api.fear-greed-history');
+    Route::get('/whale-alerts', [ApiController::class, 'whaleAlerts'])->name('api.whale-alerts');
+
+    // Protected API routes (for PWA)
+    Route::middleware(['auth'])->group(function () {
+        Route::get('/portfolio', [ApiController::class, 'portfolio'])->name('api.portfolio');
+        Route::post('/portfolio/sync', [ApiController::class, 'portfolioSync'])->name('api.portfolio.sync');
+    });
 });
