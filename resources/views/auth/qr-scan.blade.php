@@ -44,6 +44,11 @@
 const urlParams = new URLSearchParams(window.location.search);
 const token = urlParams.get('token');
 
+// Get fresh CSRF token from meta tag
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').content;
+}
+
 if (!token || token.length !== 64) {
     document.getElementById('status-pending').classList.add('hidden');
     document.getElementById('status-error').classList.remove('hidden');
@@ -53,9 +58,10 @@ async function approveLogin() {
     try {
         const res = await fetch('/auth/qr/approve', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() },
             body: JSON.stringify({ token }),
         });
+        if (res.status === 419) { window.location.reload(); return; }
         const data = await res.json();
         if (data.success) {
             document.getElementById('status-pending').classList.add('hidden');

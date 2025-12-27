@@ -94,6 +94,20 @@ let currentPin = '';
 let confirmPin = '';
 let isConfirming = false;
 
+// Get fresh CSRF token from meta tag
+function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+// Wrapper for fetch that handles 419 by refreshing the page
+async function csrfFetch(url, options = {}) {
+    options.headers = options.headers || {};
+    options.headers['X-CSRF-TOKEN'] = getCsrfToken();
+    const response = await fetch(url, options);
+    if (response.status === 419) { window.location.reload(); return null; }
+    return response;
+}
+
 async function generateFingerprint() {
     const data = [navigator.userAgent, navigator.language, screen.width + 'x' + screen.height, screen.colorDepth, new Date().getTimezoneOffset(), navigator.hardwareConcurrency || 'unknown', navigator.platform].join('|');
     const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
@@ -179,11 +193,12 @@ async function savePin() {
     document.getElementById('pin-status').textContent = 'Even geduld...';
 
     try {
-        const res = await fetch('/auth/pin/setup', {
+        const res = await csrfFetch('/auth/pin/setup', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ fingerprint: deviceFingerprint, pin: currentPin }),
         });
+        if (!res) return;
         const data = await res.json();
         if (data.success) window.location.href = '/';
         else {
@@ -202,11 +217,11 @@ async function savePin() {
 async function setupBiometric() {
     if (!window.PublicKeyCredential) { alert('Niet ondersteund'); return; }
     try {
-        const optRes = await fetch('/auth/passkey/register/options', {
+        const optRes = await csrfFetch('/auth/passkey/register/options', {
             method: 'POST',
-            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
         });
-        if (!optRes.ok) throw new Error('Kon niet starten');
+        if (!optRes || !optRes.ok) throw new Error('Kon niet starten');
         const options = await optRes.json();
 
         const credential = await navigator.credentials.create({
@@ -220,9 +235,9 @@ async function setupBiometric() {
             }
         });
 
-        const regRes = await fetch('/auth/passkey/register', {
+        const regRes = await csrfFetch('/auth/passkey/register', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 id: credential.id,
                 rawId: bufferToBase64url(credential.rawId),
@@ -233,10 +248,10 @@ async function setupBiometric() {
                 },
             }),
         });
-        if (regRes.ok) {
-            await fetch('/auth/pin/biometric', {
+        if (regRes && regRes.ok) {
+            await csrfFetch('/auth/pin/biometric', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fingerprint: deviceFingerprint }),
             });
             window.location.href = '/';
