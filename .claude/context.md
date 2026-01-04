@@ -35,6 +35,12 @@ php artisan crypto:generate-signals  # Signalen
 php artisan crypto:seed-assets       # Assets seeden
 ```
 
+## Lokale Development
+
+```bash
+php artisan serve --port=8004   # http://localhost:8004
+```
+
 ## Deployment
 
 ```bash

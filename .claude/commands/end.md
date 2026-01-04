@@ -1,36 +1,118 @@
 # End Session Command
 
-Voer de volgende stappen uit om de sessie netjes af te ronden:
+> **VERPLICHT** bij elke sessie-afsluiting - laat het project netjes achter!
 
-## 1. Git commit & push (LOKAAL)
-- `git add .`
-- Maak een duidelijke commit message met samenvatting van de wijzigingen
-- `git push origin master`
+## 1. Review Smallwork.md (EERST!)
 
-**BELANGRIJK:** Altijd via GitHub deployen! Nooit rsync/scp gebruiken.
+Lees `.claude/smallwork.md` en check elke entry:
 
-## 2. Deploy naar server (via git pull)
-```bash
-ssh root@188.245.159.115 << 'EOF'
-cd /var/www/safehavun/production
-git pull origin master
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-php artisan config:clear
-php artisan cache:clear
-php artisan route:clear
-php artisan view:clear
-EOF
+```
+Voor elke fix in smallwork.md:
+  ├── Moet dit naar permanente docs?
+  │     ├── Feature/functionaliteit → SPEC.md of FEATURES.md
+  │     ├── Styling → STYLING.md
+  │     ├── Business rule → relevante doc
+  │     └── Technisch/eenmalig → blijft in smallwork
+  │
+  └── Verplaats indien nodig en vink af
 ```
 
-## 3. Branch cleanup
-- Check op open branches: `git branch -a`
-- Verwijder gemergte lokale branches: `git branch --merged | grep -v master | xargs git branch -d`
+## 2. MD Bestanden Netjes Achterlaten (KRITIEK!)
 
-## 4. Bevestig aan gebruiker
-- Geef korte samenvatting van wat er gedaan is
-- Vermeld eventuele openstaande items
-- Bevestig dat deploy is gelukt
+### Controleer en update:
 
-## 5. Sluit af
-- Zeg: "Sessie afgerond. SafeHavun is gedeployed naar https://safehavun.havun.nl"
+```
+CLAUDE.md                    ← Zijn er nieuwe regels/restricties?
+.claude/context.md           ← Is er nieuwe project kennis?
+.claude/smallwork.md         ← Is alles afgehandeld?
+```
+
+### Vraag jezelf:
+- [ ] Wat hebben we besproken dat NIET gedocumenteerd is?
+- [ ] Zijn er beslissingen genomen die vastgelegd moeten worden?
+- [ ] Heeft de gebruiker iets uitgelegd dat opgeslagen moet worden?
+- [ ] Zijn er nieuwe patterns/oplossingen die herbruikbaar zijn?
+
+### Waar opslaan?
+
+| Nieuwe kennis | Locatie |
+|---------------|---------|
+| Project-specifiek | `.claude/context.md` |
+| Herbruikbaar pattern | `D:\GitHub\HavunCore\docs\kb\patterns\` |
+| How-to procedure | `D:\GitHub\HavunCore\docs\kb\runbooks\` |
+| Architectuur beslissing | `D:\GitHub\HavunCore\docs\kb\decisions\` |
+
+## 3. Maak een Handover voor Volgende Sessie
+
+Voeg toe aan `.claude/context.md` of maak `.claude/handover.md`:
+
+```markdown
+## Laatste Sessie: [DATUM]
+
+### Wat is gedaan:
+- [Taak 1]
+- [Taak 2]
+
+### Openstaande items:
+- [ ] [Nog te doen 1]
+- [ ] [Nog te doen 2]
+
+### Belangrijke context voor volgende keer:
+- [Relevante info die de volgende Claude moet weten]
+- [Beslissingen die genomen zijn en waarom]
+
+### Bekende issues/bugs:
+- [Issue 1]
+```
+
+## 4. Git Commit & Push
+
+```bash
+git add .
+git commit -m "docs: Session handover [datum] + [korte beschrijving]"
+git push origin master
+```
+
+## 5. Deploy naar Server (indien nodig)
+
+```bash
+ssh root@188.245.159.115
+cd [project path]  # Zie HavunCore/.claude/context.md voor paden
+git pull
+php artisan config:clear && php artisan cache:clear
+```
+
+## 6. Branch Cleanup
+
+```bash
+git branch --merged | grep -v master | xargs git branch -d
+```
+
+## 7. Bevestig aan Gebruiker
+
+```
+📋 Sessie Samenvatting:
+  - [Wat gedaan]
+
+📝 Gedocumenteerd:
+  - [Welke MD files bijgewerkt]
+
+🔧 Smallwork:
+  - [X items afgehandeld, Y naar permanente docs]
+
+⏳ Openstaand:
+  - [Nog te doen]
+
+✅ Handover gemaakt voor volgende sessie
+✅ Git gepusht
+
+Sessie afgerond. Typ 'exit' of Ctrl+D om te sluiten.
+```
+
+## NIET DOEN BIJ AFSLUITEN
+
+❌ Afsluiten zonder smallwork.md te reviewen
+❌ Afsluiten zonder MD files te checken
+❌ Kennis "in je hoofd houden" - de volgende Claude weet het niet!
+❌ Geen handover maken bij openstaande items
+❌ Pushen zonder duidelijke commit message
