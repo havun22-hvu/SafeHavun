@@ -66,6 +66,30 @@
     </style>
 
     @stack('styles')
+
+    <!-- CSRF Token Refresh Helper (fixes 419 errors after inactivity) -->
+    <script>
+        window.fetchWithCsrf = async function(url, options = {}) {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            options.headers = {
+                ...options.headers,
+                'X-CSRF-TOKEN': csrfMeta.content,
+                'Accept': 'application/json',
+            };
+
+            let response = await fetch(url, options);
+
+            if (response.status === 419) {
+                const refreshResponse = await fetch('/csrf-refresh');
+                const data = await refreshResponse.json();
+                csrfMeta.content = data.token;
+                options.headers['X-CSRF-TOKEN'] = data.token;
+                response = await fetch(url, options);
+            }
+
+            return response;
+        };
+    </script>
 </head>
 <body class="text-gray-100 antialiased">
     <nav class="glass sticky top-0 z-50">

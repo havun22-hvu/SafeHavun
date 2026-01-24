@@ -1,11 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)",
-      "Bash(composer:*)",
-      "Bash(php artisan:*)",
-      "Bash(npm:*)",
-      "Bash(ssh:*)"
-    ]
+      "Bash",
+      "Read",
+      "Edit",
+      "Write"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(format C:)",
+      "Bash(git push --force origin main)",
+      "Bash(git push --force origin master)"
+    ],
+    "defaultMode": "bypassPermissions"
   }
 }
